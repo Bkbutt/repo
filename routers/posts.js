@@ -16,14 +16,15 @@ const protect = require("../middleware/authMiddleware.js");
 var nodemailer = require("nodemailer");
 var handlebars = require("handlebars");
 const { VERSION } = require("handlebars/runtime");
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 // router.get('/findjobs',(req,res)=>{res.send('here you can see jobs offeredd')});
 
 // fill post job form
-router.post("/postjob", protect, async (req, res) => {
+router.post("/postjob",upload.single("postimg"), protect, async (req, res) => {
   const {
     shopname,
-    postimg,
     jobname,
     timing,
     shoploc,
@@ -32,13 +33,14 @@ router.post("/postjob", protect, async (req, res) => {
     experience,
     salary,
     description,
-  } = req.body; //11
+  } = req.body;
   if (!shopname || !jobname || !timing || !shoploc || !workersReq || !salary) {
     //6 required credentials
     return res.status(422).json({ error: "Please fill the required fields" });
   }
   try {
-    const post = new jobPost(req.body); //no need to write all values
+    const post = new jobPost(req.body);
+    const impostimg = new jobPost(req.file);  //no need to write all values
     post.user_id = req.user._id; // post.user_id=currentuser;
     post.username = req.user.name;
     post.user_email = req.user.email;
@@ -49,6 +51,7 @@ router.post("/postjob", protect, async (req, res) => {
     console.log(err);
     return res.status(400).json({ err });
   }
+  
 });
 
 //update post
